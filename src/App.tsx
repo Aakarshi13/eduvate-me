@@ -10,27 +10,39 @@ import Placements from "./pages/Placements";
 import Accommodation from "./pages/Accommodation";
 import Scholarships from "./pages/Scholarships";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import { AuthProvider, RequireAuth } from "@/lib/auth";
+import { ThemeProvider } from "@/lib/theme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/compare" element={<Compare />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/placements" element={<Placements />} />
-          <Route path="/accommodation" element={<Accommodation />} />
-          <Route path="/scholarships" element={<Scholarships />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+
+              <Route path="/" element={<RequireAuth><Index /></RequireAuth>} />
+              <Route path="/compare" element={<RequireAuth><Compare /></RequireAuth>} />
+              <Route path="/calendar" element={<RequireAuth><Calendar /></RequireAuth>} />
+              <Route path="/placements" element={<RequireAuth><Placements /></RequireAuth>} />
+              <Route path="/accommodation" element={<RequireAuth><Accommodation /></RequireAuth>} />
+              <Route path="/scholarships" element={<RequireAuth><Scholarships /></RequireAuth>} />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

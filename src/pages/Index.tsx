@@ -99,9 +99,18 @@ export default function Index() {
     <Layout>
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
+        {/* Light Mode Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none dark:hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl animate-float" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl animate-float delay-2s" />
+          <div className="absolute top-1/2 left-1/4 w-72 h-72 bg-cyan-200/25 rounded-full blur-3xl animate-pulse-slow" />
+        </div>
+
+        {/* Dark Mode Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none hidden dark:block">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-float-rotate" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-float delay-2s" />
+          <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl animate-pulse-slow" />
         </div>
 
         <div className="container mx-auto px-4 relative">
