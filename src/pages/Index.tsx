@@ -3,7 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { ExamSelector } from '@/components/predictor/ExamSelector';
 import { ScoreInput, PredictionInput } from '@/components/predictor/ScoreInput';
 import { CollegeResults } from '@/components/predictor/CollegeResults';
-import { colleges, College } from '@/data/mockData';
+import { colleges, College, getLatestCutoff } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GraduationCap, TrendingUp, Users, Award, ArrowRight } from 'lucide-react';
@@ -49,7 +49,8 @@ export default function Index() {
     const competitive: College[] = [];
 
     colleges.forEach((college) => {
-      const cutoff = college.cutoffs.jee?.general || 10000;
+      const latestCutoff = getLatestCutoff(college.cutoffs.jee);
+      const cutoff = latestCutoff?.general || 10000;
       
       if (adjustedRank <= cutoff * 0.6) {
         safe.push(college);
