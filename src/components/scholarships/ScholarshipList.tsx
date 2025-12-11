@@ -138,7 +138,7 @@ export function ScholarshipList() {
                       <Badge variant="outline" className={catConfig.color}>
                         {catConfig.label}
                       </Badge>
-                      {scholarship.examType.map((exam) => (
+                      {scholarship.exam_types?.map((exam: string) => (
                         <Badge key={exam} variant="secondary" className="text-xs uppercase">
                           {exam}
                         </Badge>

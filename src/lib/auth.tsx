@@ -1,8 +1,11 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { authAPI, getAuthToken } from "./api";
 
 type User = {
+  id: number;
   email: string;
+  name?: string;
 };
 
 type AuthContextType = {
@@ -22,33 +25,38 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    try {
-      const raw = localStorage.getItem(authStorageKey);
-      if (raw) {
-        setUser(JSON.parse(raw));
+    const initAuth = async () => {
+      try {
+        const token = getAuthToken();
+        if (token) {
+          const data = await authAPI.getProfile();
+          setUser(data.user);
+        }
+      } catch (e) {
+        console.error('Failed to load user profile:', e);
+        authAPI.signout();
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    initAuth();
   }, []);
 
-  const signIn = async (email: string, _password: string) => {
-    // mock sign in — replace with real API call
-    const u = { email };
-    localStorage.setItem(authStorageKey, JSON.stringify(u));
-    setUser(u);
+  const signIn = async (email: string, password: string) => {
+    const data = await authAPI.signin(email, password);
+    setUser(data.user);
+    localStorage.setItem(authStorageKey, JSON.stringify(data.user));
   };
 
-  const signUp = async (email: string, _password: string) => {
-    // mock sign up — replace with real API call
-    const u = { email };
-    localStorage.setItem(authStorageKey, JSON.stringify(u));
-    setUser(u);
+  const signUp = async (email: string, password: string) => {
+    const data = await authAPI.signup(email, password);
+    setUser(data.user);
+    localStorage.setItem(authStorageKey, JSON.stringify(data.user));
   };
 
   const signOut = () => {
+    authAPI.signout();
     localStorage.removeItem(authStorageKey);
     setUser(null);
   };
