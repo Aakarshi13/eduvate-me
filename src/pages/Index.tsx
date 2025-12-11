@@ -3,16 +3,18 @@ import { Layout } from '@/components/layout/Layout';
 import { ExamSelector } from '@/components/predictor/ExamSelector';
 import { ScoreInput, PredictionInput } from '@/components/predictor/ScoreInput';
 import { CollegeResults } from '@/components/predictor/CollegeResults';
-import { colleges, College, getLatestCutoff } from '@/data/mockData';
+import { College } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GraduationCap, TrendingUp, Users, Award, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { collegesAPI } from '@/lib/api';
 
 export default function Index() {
   const [selectedExam, setSelectedExam] = useState('jee');
   const [showResults, setShowResults] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<{ safe: College[]; likely: College[]; competitive: College[] }>({
     safe: [],
     likely: [],
@@ -22,47 +24,38 @@ export default function Index() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handlePredict = (input: PredictionInput) => {
-    // Mock prediction logic based on rank
-    let rank = input.score;
-    
-    // Convert percentile/marks to approximate rank
-    if (input.scoreType === 'percentile') {
-      rank = Math.round((100 - input.score) * 10000 / 100);
-    } else if (input.scoreType === 'marks') {
-      rank = Math.round((300 - input.score) * 50);
-    }
-
-    // Category adjustment
-    const categoryMultiplier = {
-      general: 1,
-      obc: 1.5,
-      sc: 3,
-      st: 2.5,
-      ews: 1.2,
-    };
-
-    const adjustedRank = rank / (categoryMultiplier[input.category as keyof typeof categoryMultiplier] || 1);
-
-    const safe: College[] = [];
-    const likely: College[] = [];
-    const competitive: College[] = [];
-
-    colleges.forEach((college) => {
-      const latestCutoff = getLatestCutoff(college.cutoffs.jee);
-      const cutoff = latestCutoff?.general || 10000;
+  const handlePredict = async (input: PredictionInput) => {
+    try {
+      setLoading(true);
       
-      if (adjustedRank <= cutoff * 0.6) {
-        safe.push(college);
-      } else if (adjustedRank <= cutoff * 1.0) {
-        likely.push(college);
-      } else if (adjustedRank <= cutoff * 1.5) {
-        competitive.push(college);
+      // Convert score to rank
+      let rank = input.score;
+      
+      if (input.scoreType === 'percentile') {
+        rank = Math.round((100 - input.score) * 10000 / 100);
+      } else if (input.scoreType === 'marks') {
+        rank = Math.round((300 - input.score) * 50);
       }
-    });
 
-    setResults({ safe, likely, competitive });
-    setShowResults(true);
+      // Call API
+      const data = await collegesAPI.predict({
+        rank,
+        category: input.category,
+        examType: selectedExam,
+      });
+
+      setResults(data.results);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Prediction error:', error);
+      toast({
+        title: "Prediction failed",
+        description: error instanceof Error ? error.message : "Failed to predict colleges",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddToCompare = (college: College) => {
